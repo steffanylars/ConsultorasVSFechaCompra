@@ -37,18 +37,14 @@ import warnings  # re-import after suppression setup
 # Suprimir sólo PerformanceWarning de pandas (e.g. fragmentación de DataFrame)
 warnings.filterwarnings("ignore", category=pd.errors.PerformanceWarning)
 
-# =========================
-# Config
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Config. inicial.
 st.set_page_config(
     page_title="Mary Kay · Órdenes",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# =========================
-# Brand tokens
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Brand tokens
 MK_PINK      = "#E91E8C"
 MK_PINK_DARK = "#C2185B"
 MK_PINK_SOFT = "#FCE4EC"
@@ -64,9 +60,7 @@ _GRUPO_RANK     = {g: i for i, g in enumerate(GRUPO_ORDER)}
 
 LOGO_URL = "https://1000marcas.net/wp-content/uploads/2021/05/Mary-Kay-logo.jpg"
 
-# =========================
-# CSS
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ CSS
 st.markdown(
     f"""
 <style>
@@ -299,9 +293,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# =========================
-# Helpers — bucketización
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Helpers — bucketización
 _BUCKET_BINS   = [0, 8, 16, 24, 31]
 _BUCKET_LABELS = GRUPO_ORDER
 
@@ -314,9 +306,7 @@ def bucketize(series: pd.Series) -> pd.Categorical:
     )
 
 
-# =========================
-# Carga y validación
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Carga y validación
 @st.cache_data(show_spinner="Cargando datos...")
 def cargar_datos(file) -> tuple[pd.DataFrame, dict]:
     """
@@ -392,9 +382,7 @@ def cargar_datos(file) -> tuple[pd.DataFrame, dict]:
     return df, meta
 
 
-# =========================
-# Panel primer orden por consultora-mes
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Panel primer orden por consultora-mes
 @st.cache_data(show_spinner="Construyendo panel por consultora y mes...")
 def construir_primer(df: pd.DataFrame, ws_col: str) -> pd.DataFrame:
     """
@@ -435,9 +423,8 @@ def construir_primer(df: pd.DataFrame, ws_col: str) -> pd.DataFrame:
     return primer
 
 
-# =========================
-# Helper cacheado: eventos de reorden
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Helper cacheado: eventos de reorden
+
 @st.cache_data(show_spinner=False)
 def build_reorder_events(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -477,9 +464,7 @@ def build_reorder_events(df: pd.DataFrame) -> pd.DataFrame:
     return d
 
 
-# =========================
-# Hover breakdown para Tab 1
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Hover breakdown para Tab 1
 @st.cache_data(show_spinner=False)
 def build_reorder_bucket_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -543,9 +528,7 @@ def build_reorder_bucket_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     return wide
 
 
-# =========================
-# Helpers de visualización
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Helpers de visualización
 _FONT_FAMILY = 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial'
 
 def mk_plotly_layout(fig: go.Figure, title: str, y_title: str = "", x_title: str = "") -> go.Figure:
@@ -592,9 +575,7 @@ def kpi_card(col, label: str, value: str, note: str = "") -> None:
         )
 
 
-# =========================
-# Sidebar
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Sidebar
 with st.sidebar:
     st.image(LOGO_URL, use_container_width=True)
     st.markdown("### Filtros")
@@ -613,9 +594,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-# =========================
-# Header
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Header
 st.markdown(
     """
 <div class="mk-header">
@@ -633,9 +612,7 @@ if uploaded is None:
     )
     st.stop()
 
-# =========================
-# Carga + metadatos
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Carga + metadatos
 df, meta = cargar_datos(uploaded)
 ws_col = meta["ws_col"]
 
@@ -665,9 +642,7 @@ if meta["n_winsor"] > 0:
         unsafe_allow_html=True,
     )
 
-# =========================
-# Resumen por grupo
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Resumen por grupo
 resumen = (
     primer_f.groupby("GrupoPrimerOrden", observed=True)
     .agg(
@@ -690,9 +665,7 @@ resumen   = resumen.merge(
     how="left",
 )
 
-# =========================
-# KPIs
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ KPIssss
 total_cons   = int(primer_f["ConsultantNumber"].nunique())
 pct_reorden  = float(primer_f["Reordena"].mean() * 100) if len(primer_f) else 0.0
 avg_ws_total = float(primer_f["AvgWholesale"].mean()) if len(primer_f) else 0.0
@@ -706,14 +679,10 @@ kpi_card(k4, "Grupo top reorden",  grp_top)
 
 st.markdown("")
 
-# =========================
-# Tabs
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tabs
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["Resumen", "Por mes", "Wholesale", "Insights", "Datos"])
 
-# ─────────────────────────────
-# Tab 1: Resumen
-# ─────────────────────────────
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tab 1: Resumen
 with tab1:
     cA, cB = st.columns(2)
 
@@ -863,9 +832,7 @@ with tab1:
             unsafe_allow_html=True,
         )
 
-# ─────────────────────────────
-# Tab 2: Por mes
-# ─────────────────────────────
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tab 2: Por mes
 with tab2:
     resumen_mes = (
         primer_f.groupby(["MonthSort", "Month", "GrupoPrimerOrden"], observed=True)
@@ -894,9 +861,7 @@ with tab2:
     fig_line = mk_plotly_layout(fig_line, "Evolución del % Reorden por mes", "% Reorden")
     st.plotly_chart(fig_line, use_container_width=True)
 
-# ─────────────────────────────
-# Tab 3: Wholesale
-# ─────────────────────────────
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tab 3: Wholesale
 with tab3:
     c1, c2 = st.columns(2)
 
@@ -943,9 +908,7 @@ with tab3:
         unsafe_allow_html=True,
     )
 
-# ─────────────────────────────
-# Tab 4: Insights
-# ─────────────────────────────
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tab 4: Insights
 with tab4:
     # Perfil de órdenes diarias ──────────────────────────────────────────
     st.markdown(
@@ -1132,9 +1095,7 @@ with tab4:
                 unsafe_allow_html=True,
             )
 
-# ─────────────────────────────
-# Tab 5: Datos
-# ─────────────────────────────
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Tab 5: Datos
 with tab5:
     st.markdown('<div class="mk-card"><h3 class="mk-card-title">Datos procesados</h3></div>', unsafe_allow_html=True)
     st.markdown(f"<div class='mk-caption'>Registros: {len(primer_f):,}</div>", unsafe_allow_html=True)
@@ -1155,9 +1116,8 @@ with tab5:
         mime="text/csv",
     )
 
-# =========================
-# Footer
-# =========================
+# ☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★☆★ Footer
+
 st.markdown(
     "<div class='mk-caption' style='text-align:center; padding-top: 14px;'>"
     "Mary Kay de México · Market Intelligence · Steffany Lara · Febrero 2026"
