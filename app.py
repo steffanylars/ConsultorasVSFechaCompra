@@ -751,6 +751,84 @@ with tab1:
         fig2 = mk_plotly_layout(fig2, "% Reorden por grupo", "% Reorden")
         st.plotly_chart(fig2, use_container_width=True)
 
+    
+    
+    # ── Tabla: distribución de reórdenes por bucket (visible sin hover) ──
+    # Usa `breakdown` ya calculado arriba por build_reorder_bucket_breakdown(df_f)
+    # y `resumen` que ya tiene el merge. No se recomputa ninguna lógica nueva.
+    breakdown_tbl = breakdown[
+        ["GrupoPrimerOrden", "Días 1-8", "Días 9-16", "Días 17-24", "Días 25-fin"]
+    ].copy()
+    # Añadir % Reorden del grupo para contexto
+    breakdown_tbl = breakdown_tbl.merge(
+        resumen[["GrupoPrimerOrden", "PctReorden_%"]], on="GrupoPrimerOrden", how="left"
+    )
+    breakdown_tbl = breakdown_tbl[
+        ["GrupoPrimerOrden", "PctReorden_%", "Días 1-8", "Días 9-16", "Días 17-24", "Días 25-fin"]
+    ]
+    breakdown_tbl.columns = [
+        "Grupo primer pedido",
+        "% Reorden del grupo",
+        "% reórdenes en 1–8",
+        "% reórdenes en 9–16",
+        "% reórdenes en 17–24",
+        "% reórdenes en 25–fin",
+    ]
+
+    _no_reorders = breakdown_tbl[
+        ["% reórdenes en 1–8", "% reórdenes en 9–16", "% reórdenes en 17–24", "% reórdenes en 25–fin"]
+    ].sum().sum() == 0
+
+    st.markdown(
+        '<div class="mk-card">'
+        '<h3 class="mk-card-title">¿Cuándo reordenan? — Distribución de reórdenes por grupo de primer pedido</h3>'
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    if _no_reorders:
+        st.markdown(
+            "<div class='mk-insight'>Sin reórdenes en la selección actual — "
+            "todos los valores son 0%.</div>",
+            unsafe_allow_html=True,
+        )
+
+    _pct_cols = [
+        "% Reorden del grupo",
+        "% reórdenes en 1–8",
+        "% reórdenes en 9–16",
+        "% reórdenes en 17–24",
+        "% reórdenes en 25–fin",
+    ]
+    styled_breakdown = (
+        breakdown_tbl.style
+        .format({c: "{:.1f}%" for c in _pct_cols})
+        .background_gradient(
+            subset=["% reórdenes en 1–8", "% reórdenes en 9–16",
+                    "% reórdenes en 17–24", "% reórdenes en 25–fin"],
+            cmap="RdPu",
+            vmin=0,
+            vmax=100,
+        )
+        .background_gradient(subset=["% Reorden del grupo"], cmap="RdPu", vmin=0, vmax=100)
+    )
+    try:
+        styled_breakdown = styled_breakdown.hide(axis="index")
+    except Exception:
+        pass
+
+    st.dataframe(styled_breakdown, use_container_width=True)
+    st.markdown(
+        "<div class='mk-caption'>"
+        "Cada fila muestra, para las consultoras cuyo <b>primer pedido del mes</b> cayó en ese grupo de días, "
+        "qué porcentaje de sus reórdenes ocurrieron en cada rango del mes. "
+        "Las celdas vacías (0%) corresponden a combinaciones temporalmente imposibles "
+        "(no se puede reordenar en un bucket anterior al del primer pedido)."
+        "</div>",
+        unsafe_allow_html=True,
+    )
+    
+
+
     st.markdown('<div class="mk-card"><h3 class="mk-card-title">Tabla resumen</h3></div>', unsafe_allow_html=True)
 
     tabla = resumen[["GrupoPrimerOrden", "ConsultorasUnicas", "PctReorden_%", "AvgWholesale", "MedianaWS"]].copy()
